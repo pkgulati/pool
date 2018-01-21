@@ -65,7 +65,6 @@ class Pool extends EventEmitter {
     this.options = Object.assign({}, options)
     this.options.max = this.options.max || this.options.poolSize || 10
     this.log = this.options.log || function () { }
-    this.Client = this.options.Client || Client || require('pg').Client
     this.Promise = this.options.Promise || global.Promise
 
     if (typeof this.options.idleTimeoutMillis === 'undefined') {
@@ -172,7 +171,7 @@ class Pool extends EventEmitter {
       return result
     }
 
-    const client = new this.Client(this.options)
+    var client = new net.Socket();
     this._clients.push(client)
     const idleListener = (err) => {
       err.client = client
@@ -194,9 +193,8 @@ class Pool extends EventEmitter {
     if (this.options.connectionTimeoutMillis) {
       tid = setTimeout(() => {
         this.log('ending client due to timeout')
-        timeoutHit = true
-        // force kill the node driver, and let libpq do its teardown
-        client.connection ? client.connection.stream.destroy() : client.end()
+        timeoutHit = true;
+         client.end();
       }, this.options.connectionTimeoutMillis)
     }
 
@@ -231,7 +229,7 @@ class Pool extends EventEmitter {
     return response.result
   }
 
-  query (text, values, cb) {
+  send (data, cb) {
     // guard clause against passing a function as the first parameter
     if (typeof text === 'function') {
       const response = promisify(this.Promise, text)
@@ -253,8 +251,7 @@ class Pool extends EventEmitter {
         return cb(err)
       }
       this.log('dispatching query')
-      client.query(text, values, (err, res) => {
-        this.log('query dispatched')
+      client.write(data, (err, res) => {
         client.release(err)
         if (err) {
           return cb(err)
