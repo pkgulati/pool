@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <style>
+    .btn {
+      position: relative;
+
+      display: block;
+      margin: 30px auto;
+      padding: 0;
+
+      overflow: hidden;
+
+      border-width: 0;
+      outline: none;
+      border-radius: 2px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .6);
+
+      background-color: #2ecc71;
+      color: #ecf0f1;
+
+      transition: background-color .3s;
+    }
+
+    .btn:hover,
+    .btn:focus {
+      background-color: #27ae60;
+    }
+
+    .btn>* {
+      position: relative;
+    }
+
+    .btn span {
+      display: block;
+      padding: 12px 24px;
+    }
+
+    .btn:before {
+      content: "";
+
+      position: absolute;
+      top: 50%;
+      left: 50%;
+
+      display: block;
+      width: 0;
+      padding-top: 0;
+
+      border-radius: 100%;
+
+      background-color: rgba(236, 240, 241, .3);
+
+      -webkit-transform: translate(-50%, -50%);
+      -moz-transform: translate(-50%, -50%);
+      -ms-transform: translate(-50%, -50%);
+      -o-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
+
+    .btn:active:before {
+      width: 120%;
+      padding-top: 120%;
+
+      transition: width .2s ease-out, padding-top .2s ease-out;
+    }
+
+    input {
+      margin: 40px 25px;
+      width: 200px;
+      display: block;
+      border: none;
+      padding: 10px 0;
+      border-bottom: solid 1px $color;
+      transition: all 0.3s cubic-bezier(.64, .09, .08, 1);
+      background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 96%, $color 4%);
+      background-position: -200px 0;
+      background-size: 200px 100%;
+      background-repeat: no-repeat;
+      color: darken($color, 20%);
+      &:focus,
+      &:valid {
+        box-shadow: none;
+        outline: none;
+        background-position: 0 0;
+        &::-webkit-input-placeholder {
+          color: $color;
+          font-size: 11px;
+          transform: translateY(-20px);
+          visibility: visible !important;
+        }
+      }
+    }
+
+
+    html {
+      height: 100%;
+    }
+
+    .row {
+      display: flex;  
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>Socket Pool Example</h2>
+
+  <div class="row">
+    <label>Connection Number</label>
+    <input id="connection" placeholder="Connection Number" type="text" required="" value="1">
+    <button class="btn" type="button" onclick="send()">
+        <span>Send</span>
+      </button>  
+    <button class="btn" type="button" onclick="connect()">
+      <span>New Connection</span>
+    </button>
+    <button class="btn" type="button" onclick="disconnect()">
+        <span>Disconnect</span>
+      </button>
+  </div>
+
+  <div id="demo">
+  </div>
+
+
+  <script>
+
+    function connect() {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          document.getElementById("demo").innerHTML = xhttp.responseText;
+        }
+      };
+      xhttp.open("GET", "/connect/new", true);
+      xhttp.send();
+    }
+
+    function initialize() {
+    
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          document.getElementById("demo").innerHTML = xhttp.responseText;
+        }
+      };
+      xhttp.open("GET", "/status", true);
+      xhttp.send();
+    }
+
+    function send() {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          document.getElementById("demo").innerHTML = xhttp.responseText;
+        }
+      };
+      var el = document.getElementById("connection");
+      var url = '/send/' + (el.value ? el.value : 1); 
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+
+    function disconnect() {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+          document.getElementById("demo").innerHTML = xhttp.responseText;
+        }
+      };
+      var el = document.getElementById("connection");
+      var url = '/disconnect/' + (el.value ? el.value : 1); 
+      xhttp.open("GET", url, true);
+      xhttp.send();
+    }
+    initialize();
+
+  </script>
+
+</body>
+
+</html>
