@@ -16,8 +16,10 @@ function handleConnection(conn) {
   conn.on('error', onConnError);
 
   function onConnData(d) {
-    console.log('connection data from %s: %j', remoteAddress, d);
-    conn.write(d);
+    	console.log('connection data from %s: %j', remoteAddress, d);
+	setTimeout(function() {
+    		conn.write(d);
+	}, 2000);
   }
 
   function onConnClose() {

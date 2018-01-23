@@ -100,7 +100,7 @@
     }
 
     .row {
-      display: flex;  
+      display: flex;
     }
   </style>
 </head>
@@ -109,31 +109,41 @@
 
   <h2>Socket Pool Example</h2>
 
+  <h2 id="response">
+  </h2>
+
+  <br>
+
   <div class="row">
     <label>Connection Number</label>
     <input id="connection" placeholder="Connection Number" type="text" required="" value="1">
+    <label>Message</label>
+    <input id="message" placeholder="Message" type="text" required="" value="some text">
+  </div>
+
+  <div class="row">
     <button class="btn" type="button" onclick="send()">
-        <span>Send</span>
-      </button>  
+      <span>Send</span>
+    </button>
     <button class="btn" type="button" onclick="connect()">
       <span>New Connection</span>
     </button>
     <button class="btn" type="button" onclick="disconnect()">
-        <span>Disconnect</span>
-      </button>
+      <span>Disconnect</span>
+    </button>
   </div>
 
-  <div id="demo">
+  <div id="status">
   </div>
 
-
+ 
   <script>
 
     function connect() {
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("demo").innerHTML = xhttp.responseText;
+          document.getElementById("status").innerHTML = xhttp.responseText;
         }
       };
       xhttp.open("GET", "/connect/new", true);
@@ -141,11 +151,11 @@
     }
 
     function initialize() {
-    
+
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("demo").innerHTML = xhttp.responseText;
+          document.getElementById("status").innerHTML = xhttp.responseText;
         }
       };
       xhttp.open("GET", "/status", true);
@@ -156,24 +166,30 @@
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("demo").innerHTML = xhttp.responseText;
+          document.getElementById("response").innerHTML = xhttp.responseText;
         }
       };
-      var el = document.getElementById("connection");
-      var url = '/send/' + (el.value ? el.value : 1); 
-      xhttp.open("GET", url, true);
-      xhttp.send();
+      var el1 = document.getElementById("connection");
+      var el2 = document.getElementById("message");
+      var url = '/send';
+      var params = {
+        client : (el1.value ? el1.value : 1),
+        message : (el2.value ? el2.value : 1)
+      }
+      xhttp.open("POST", url, true);
+      xhttp.setRequestHeader('Content-Type', 'application/json');
+      xhttp.send(JSON.stringify(params));
     }
 
     function disconnect() {
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("demo").innerHTML = xhttp.responseText;
+          document.getElementById("status").innerHTML = xhttp.responseText;
         }
       };
       var el = document.getElementById("connection");
-      var url = '/disconnect/' + (el.value ? el.value : 1); 
+      var url = '/disconnect/' + (el.value ? el.value : 1);
       xhttp.open("GET", url, true);
       xhttp.send();
     }
