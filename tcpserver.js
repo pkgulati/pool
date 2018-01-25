@@ -16,10 +16,12 @@ function handleConnection(conn) {
   conn.on('error', onConnError);
 
   function onConnData(d) {
-    	console.log('connection data from %s: %j', remoteAddress, d);
-	setTimeout(function() {
+      console.log('connection data from %s: %j', remoteAddress);
+      var params = JSON.parse(String(d));
+      console.log(params);
+	  setTimeout(function() {
     		conn.write(d);
-	}, 2000);
+    }, parseInt(params.time)*1000);
   }
 
   function onConnClose() {
