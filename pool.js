@@ -30,7 +30,7 @@ function throwOnRelease () {
 }
 
 function release (client, err) {
-  console.log('release ', new Date().toISOString());
+  console.log(client.socket.localPort, 'release ', new Date().toISOString());
   client.release = throwOnRelease
   if (err || this.ending) {
     this._remove(client)
@@ -213,7 +213,7 @@ class Pool extends EventEmitter {
     console.log('connecting new client')
     
     client.connect((err) => {
-      console.log('new client connected')
+      //console.log('new client connected')
       if (tid) {
         clearTimeout(tid)
       }
@@ -260,7 +260,6 @@ class Pool extends EventEmitter {
       if (err) {
         return cb(err)
       }
-      console.log('dispatching query ', new Date().toISOString(), client.localPort);
       client.send(data, (err, res) => {
         client.release(err)
         if (err) {

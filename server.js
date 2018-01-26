@@ -39,25 +39,25 @@ app.post("/send", function(req, res) {
 var msgIndex = 0;
 var sleepTime = [21, 10, 3, 1, 5, 15, 2, 1, 10, 12, 3, 21];
 // first message
-spool.connect(function(err, client, done) {
-  var params =  {time:10, index : msgIndex};
-  msgIndex++;
-  client.send(JSON.stringify(params), function(err, res) {
-      console.log('call back of sent in server.js ', err, String(res));
-      done();
-  });
-});
+// spool.connect(function(err, client, done) {
+//   var params =  {time:10, index : msgIndex};
+//   msgIndex++;
+//   client.send(JSON.stringify(params), function(err, res) {
+//       console.log('call back of sent in server.js ', err, String(res));
+//       done();
+//   });
+// });
 
-for (var i=0; i < 10; i++) {
-  spool.connect(function(err, client, done) {
-    var params =  {time:sleepTime[i], index : msgIndex};
-    msgIndex++;
-    client.send(JSON.stringify(params), function(err, res) {
-        console.log('call back of sent in server.js ', err, String(res));
-        done();
-    });
-  });
-}
+// for (var i=0; i < 10; i++) {
+//   spool.connect(function(err, client, done) {
+//     var params =  {time:sleepTime[i], index : msgIndex};
+//     msgIndex++;
+//     client.send(JSON.stringify(params), function(err, res) {
+//         console.log('call back of sent in server.js ', err, String(res));
+//         done();
+//     });
+//   });
+// }
 
 for (var i=0; i < 10; i++) {
   var params =  {time:sleepTime[i], index : msgIndex};

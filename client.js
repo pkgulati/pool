@@ -8,7 +8,6 @@ var util = require('util');
 
 var Client = function (config) {
     EventEmitter.call(this);
-    console.log('config ', config);
     this.socket = new net.Socket();
 };
 
@@ -27,10 +26,14 @@ Client.prototype.connect = function (callback) {
     });
     this.socket.on('data', function(data) {
         // call this._callback 
-        console.log('received ', String(data));
+        console.log(self.socket.localPort, 'received ', new Date().toISOString(), String(data));
         var docb = self._callback;  
         self._callback = null;
-        docb(null, data);
+        if (docb) {
+            docb(null, data);
+        } else {
+            console.log('no callback');
+        }
     });
 };
 
@@ -39,9 +42,10 @@ Client.prototype.send = function(values,  callback) {
         callback(new Error('already busy'));
         return;
     }
+    console.log(this.socket.localPort,'dispatching query ', new Date().toISOString(),  values);  
     this._callback = callback;
     this.socket.write(values, function() {
-        console.log('sent');
+        
     });
 };
 
