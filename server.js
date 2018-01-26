@@ -1,45 +1,21 @@
 var net = require("net");
-const express = require("express");
-const app = express();
+var express = require("express");
+var app = express();
 var bodyParser = require("body-parser");
-var pool = require("./pool");
-var spool = new pool();
+var Pool = require("./pool");
+var Client = require("./client");
 
-var server = net.createServer();
-server.on("connection", handleConnection);
-
-server.listen(9000, function() {
-  console.log("server listening ");
+var spool = new Pool({
+  database: 'postgres',
+  user: 'brianc',
+  password: 'secret!',
+  port: 5432,
+  ssl: false,
+  max: 20, // set pool max size to 20
+  min: 4, // set min pool size to 4
+  idleTimeoutMillis: 990000, // close idle clients after 1 second
+  connectionTimeoutMillis: 9000, // return an error after 1 second if connection could not be established
 });
-
-function handleConnection(conn) {
-  var remoteAddress = conn.remoteAddress + ":" + conn.remotePort;
-  console.log("new client connection from ", remoteAddress);
-
-  conn.on("data", onConnData);
-  conn.once("close", onConnClose);
-  conn.on("error", onConnError);
-
-  function onConnData(d) {
-    console.log("tcpserver  data from ", remoteAddress);
-    var params = JSON.parse(String(d));
-    console.log('wait ', parseInt(params.time));
-    setTimeout(function() {
-      console.log('send back');
-      conn.write(d);
-    }, parseInt(params.time) * 1000);
-  }
-
-  function onConnClose() {
-    console.log("tcpserver connection from %s closed", remoteAddress);
-  }
-
-  function onConnError(err) {
-    console.log("tcpserver Connection %s error: %s", remoteAddress, err.message);
-  }
-}
-
-spool.connect();
 
 app.use(express.static("public"));
 app.use(bodyParser.json()); // for parsing application/json
@@ -52,8 +28,19 @@ app.get("/status", function(req, res) {
 app.post("/send", function(req, res) {
   var params = req.body;
   var sentFlag;
-  spool.send(JSON.stringify(params), function() {
-    res.send("send cb");
+  spool.connect(function(err, client, done) {
+    client.send(JSON.stringify(params), function(err, res) {
+        res.send("send cb ", err, res);
+        done();
+    });
+  });
+});
+
+// first message
+spool.connect(function(err, client, done) {
+  var params =  {time:1};
+  client.send(JSON.stringify(params), function(err, res) {
+      done();
   });
 });
 

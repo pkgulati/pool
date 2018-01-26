@@ -16,11 +16,10 @@ function handleConnection(conn) {
   conn.on('error', onConnError);
 
   function onConnData(d) {
-      console.log('connection data from %s: %j', remoteAddress);
-	console.log(d);
+      console.log('connection data from ', new Date().toISOString(), remoteAddress);
       var params = JSON.parse(String(d));
-      console.log(params);
-	  setTimeout(function() {
+      setTimeout(function() {
+		console.log('send back ', new Date().toISOString(), remoteAddress);
     		conn.write(d);
     }, parseInt(params.time)*1000);
   }

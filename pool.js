@@ -1,10 +1,15 @@
 var net = require('net');
+var Client = require('./client');
+
+
+// idea from 
+// https://github.com/brianc/node-pg-pool/blob/master/index.js
 
 'use strict'
 const EventEmitter = require('events').EventEmitter
 
 const NOOP = function () { }
-
+ 
 const removeWhere = (list, predicate) => {
   const i = list.findIndex(predicate)
 
@@ -25,7 +30,7 @@ function throwOnRelease () {
 }
 
 function release (client, err) {
-  console.log('release');
+  console.log('release ', new Date().toISOString());
   client.release = throwOnRelease
   if (err || this.ending) {
     this._remove(client)
@@ -71,7 +76,7 @@ class Pool extends EventEmitter {
     this.Promise = this.options.Promise || global.Promise
 
     if (typeof this.options.idleTimeoutMillis === 'undefined') {
-      this.options.idleTimeoutMillis = 30000
+      this.options.idleTimeoutMillis = 90000
     }
 
     this._clients = []
@@ -175,7 +180,7 @@ class Pool extends EventEmitter {
     }
 
     // for now make client as simple socket
-    var client = new net.Socket();
+    var client = new Client();
     this._clients.push(client)
     const idleListener = (err) => {
       err.client = client
@@ -206,7 +211,7 @@ class Pool extends EventEmitter {
 
     console.log('connecting new client')
     
-    client.connect(9000, "127.0.0.1", (err) => {
+    client.connect((err) => {
       console.log('new client connected')
       if (tid) {
         clearTimeout(tid)
@@ -254,7 +259,7 @@ class Pool extends EventEmitter {
       if (err) {
         return cb(err)
       }
-      console.log('dispatching query ', client.localPort);
+      console.log('dispatching query ', new Date().toISOString(), client.localPort);
       client.write(data, (err, res) => {
         client.release(err)
         if (err) {
