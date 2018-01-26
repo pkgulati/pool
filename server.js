@@ -37,7 +37,7 @@ app.post("/send", function(req, res) {
 });
 
 var msgIndex = 0;
-var sleepTime = [21, 10, 3, 1, 5, 15, 2, 1, 10, 12, 3, 21];
+var sleepTime = [16, 10, 13, 2, 5, 15, 2, 1, 10, 12, 3, 21];
 // first message
 // spool.connect(function(err, client, done) {
 //   var params =  {time:10, index : msgIndex};

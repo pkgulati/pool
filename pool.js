@@ -106,7 +106,7 @@ class Pool extends EventEmitter {
     }
     // if we don't have any waiting, do nothing
     if (!this._pendingQueue.length) {
-      console.log('no queued requests')
+      console.log('no queued requests, idle clients ', this._idle.length);
       return
     }
     // if we don't have any idle clients and we have no more room do nothing
