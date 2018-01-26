@@ -91,9 +91,9 @@ class Pool extends EventEmitter {
   }
 
   _pulseQueue () {
-    this.log('pulse queue')
+    //this.log('pulse queue')
     if (this.ending) {
-      console.log('pulse queue on ending')
+      //console.log('pulse queue on ending')
       if (this._idle.length) {
         this._idle.slice().map(item => {
           this._remove(item.client)
@@ -111,6 +111,7 @@ class Pool extends EventEmitter {
     }
     // if we don't have any idle clients and we have no more room do nothing
     if (!this._idle.length && this._isFull()) {
+      console.log('queue is full');
       return
     }
     const waiter = this._pendingQueue.shift()
@@ -260,7 +261,7 @@ class Pool extends EventEmitter {
         return cb(err)
       }
       console.log('dispatching query ', new Date().toISOString(), client.localPort);
-      client.write(data, (err, res) => {
+      client.send(data, (err, res) => {
         client.release(err)
         if (err) {
           return cb(err)

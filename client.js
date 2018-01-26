@@ -27,8 +27,10 @@ Client.prototype.connect = function (callback) {
     });
     this.socket.on('data', function(data) {
         // call this._callback 
-        console.log('received ');
-        self._callback(null, data);
+        console.log('received ', String(data));
+        var docb = self._callback;  
+        self._callback = null;
+        docb(null, data);
     });
 };
 

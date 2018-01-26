@@ -11,10 +11,10 @@ var spool = new Pool({
   password: 'secret!',
   port: 5432,
   ssl: false,
-  max: 20, // set pool max size to 20
-  min: 4, // set min pool size to 4
+  max: 3, // set pool max size to 20
+  min: 3, // set min pool size to 4
   idleTimeoutMillis: 990000, // close idle clients after 1 second
-  connectionTimeoutMillis: 9000, // return an error after 1 second if connection could not be established
+  connectionTimeoutMillis: 25000, // return an error after 1 second if connection could not be established
 });
 
 app.use(express.static("public"));
@@ -36,12 +36,33 @@ app.post("/send", function(req, res) {
   });
 });
 
+var msgIndex = 0;
+var sleepTime = [21, 10, 3, 1, 5, 15, 2, 1, 10, 12, 3, 21];
 // first message
 spool.connect(function(err, client, done) {
-  var params =  {time:1};
+  var params =  {time:10, index : msgIndex};
+  msgIndex++;
   client.send(JSON.stringify(params), function(err, res) {
+      console.log('call back of sent in server.js ', err, String(res));
       done();
   });
 });
+
+for (var i=0; i < 10; i++) {
+  spool.connect(function(err, client, done) {
+    var params =  {time:sleepTime[i], index : msgIndex};
+    msgIndex++;
+    client.send(JSON.stringify(params), function(err, res) {
+        console.log('call back of sent in server.js ', err, String(res));
+        done();
+    });
+  });
+}
+
+for (var i=0; i < 10; i++) {
+  var params =  {time:sleepTime[i], index : msgIndex};
+  msgIndex++;
+  spool.send(JSON.stringify(params));
+}
 
 app.listen(3000, () => console.log("Example app listening on port 3000!"));
