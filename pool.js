@@ -1,3 +1,5 @@
+var net = require('net');
+
 'use strict'
 const EventEmitter = require('events').EventEmitter
 
@@ -23,6 +25,7 @@ function throwOnRelease () {
 }
 
 function release (client, err) {
+  console.log('release');
   client.release = throwOnRelease
   if (err || this.ending) {
     this._remove(client)
@@ -34,7 +37,7 @@ function release (client, err) {
   let tid
   if (this.options.idleTimeoutMillis) {
     tid = setTimeout(() => {
-      this.log('remove idle client')
+      console.log('remove idle client')
       this._remove(client)
     }, this.options.idleTimeoutMillis)
   }
@@ -64,11 +67,11 @@ class Pool extends EventEmitter {
     super()
     this.options = Object.assign({}, options)
     this.options.max = this.options.max || this.options.poolSize || 10
-    this.log = this.options.log || function () { }
+    this.log = this.options.log || function (a) {console.log(a) };
     this.Promise = this.options.Promise || global.Promise
 
     if (typeof this.options.idleTimeoutMillis === 'undefined') {
-      this.options.idleTimeoutMillis = 10000
+      this.options.idleTimeoutMillis = 30000
     }
 
     this._clients = []
@@ -85,7 +88,7 @@ class Pool extends EventEmitter {
   _pulseQueue () {
     this.log('pulse queue')
     if (this.ending) {
-      this.log('pulse queue on ending')
+      console.log('pulse queue on ending')
       if (this._idle.length) {
         this._idle.slice().map(item => {
           this._remove(item.client)
@@ -98,7 +101,7 @@ class Pool extends EventEmitter {
     }
     // if we don't have any waiting, do nothing
     if (!this._pendingQueue.length) {
-      this.log('no queued requests')
+      console.log('no queued requests')
       return
     }
     // if we don't have any idle clients and we have no more room do nothing
@@ -171,13 +174,14 @@ class Pool extends EventEmitter {
       return result
     }
 
+    // for now make client as simple socket
     var client = new net.Socket();
     this._clients.push(client)
     const idleListener = (err) => {
       err.client = client
       client.removeListener('error', idleListener)
       client.on('error', () => {
-        this.log('additional client error after disconnection due to error', err)
+        console.log('additional client error after disconnection due to error', err)
       })
       this._remove(client)
       // TODO - document that once the pool emits an error
@@ -185,14 +189,13 @@ class Pool extends EventEmitter {
       this.emit('error', err, client)
     }
 
-    this.log('connecting new client')
-
+  
     // connection timeout logic
     let tid
     let timeoutHit = false
     if (this.options.connectionTimeoutMillis) {
       tid = setTimeout(() => {
-        this.log('ending client due to timeout')
+        console.log('ending client due to timeout')
         timeoutHit = true;
          client.end();
       }, this.options.connectionTimeoutMillis)
@@ -201,9 +204,10 @@ class Pool extends EventEmitter {
     const response = promisify(this.Promise, cb)
     cb = response.callback
 
-    this.log('connecting new client')
-    client.connect((err) => {
-      this.log('new client connected')
+    console.log('connecting new client')
+    
+    client.connect(9000, "127.0.0.1", (err) => {
+      console.log('new client connected')
       if (tid) {
         clearTimeout(tid)
       }
@@ -250,7 +254,7 @@ class Pool extends EventEmitter {
       if (err) {
         return cb(err)
       }
-      this.log('dispatching query')
+      console.log('dispatching query ', client.localPort);
       client.write(data, (err, res) => {
         client.release(err)
         if (err) {
@@ -264,7 +268,7 @@ class Pool extends EventEmitter {
   }
 
   end (cb) {
-    this.log('ending')
+    console.log('ending')
     if (this.ending) {
       const err = new Error('Called end on pool more than once')
       return cb ? cb(err) : this.Promise.reject(err)

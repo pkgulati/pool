@@ -17,6 +17,7 @@ function handleConnection(conn) {
 
   function onConnData(d) {
       console.log('connection data from %s: %j', remoteAddress);
+	console.log(d);
       var params = JSON.parse(String(d));
       console.log(params);
 	  setTimeout(function() {
