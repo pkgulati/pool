@@ -33,10 +33,17 @@ function handleConnection(conn) {
   function onConnData(d) {
       console.log('connection data from ', new Date().toISOString(), remoteAddress);
       var params = JSON.parse(String(d));
-      setTimeout(function() {
-		    console.log('send back ', new Date().toISOString(), remoteAddress);
-    		conn.write(d);
-    }, parseInt(params.time)*1000);
+      if (params.message == 'close') {
+        setTimeout(function() {
+            console.log('end connection');
+            conn.end(d);
+        }, parseInt(params.time)*1000);
+      } else {
+        setTimeout(function() {
+          console.log('send back ', new Date().toISOString(), remoteAddress);
+          conn.write(d);
+        }, parseInt(params.time)*1000);
+    }
   }
 
   function onConnClose() {

@@ -13,10 +13,14 @@ var spool = new Pool({
   password: 'secret!',
   port: 5432,
   ssl: false,
-  max: 4, // set pool max size to 20
-  min: 3, // set min pool size to 4
+  max: 2, // set pool max size to 20
+  min: 2, // set min pool size to 4
   idleTimeoutMillis: 990000, // close idle clients after 1 second
   connectionTimeoutMillis: 25000, // return an error after 1 second if connection could not be established
+});
+
+spool.on('error', function(err, client) {
+  console.log('pool error ');  
 });
 
 app.use(express.static("public"));
@@ -24,6 +28,7 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 app.get("/status", function(req, res) {
+  console.log('idleCount', spool.idleCount);
   res.send(JSON.stringify(messages));
 });
 
@@ -42,10 +47,14 @@ app.post("/send", function(req, res) {
     var date = new Date; 
     messages[messageIndex].sent = '' + date.getMinutes() + ':' + date.getSeconds();
     messages[messageIndex].received = 'processing';
+
     client.send(JSON.stringify(params), function(err, data) {
           var date = new Date; 
-          messages[messageIndex].received = '' + date.getMinutes() + ':' + date.getSeconds();  
-        done();
+          messages[messageIndex].received = '' + date.getMinutes() + ':' + date.getSeconds();
+          if (err) {
+            messages[messageIndex].status = 'Error ' + err;
+          }
+        done(err);
     });
   });
 });

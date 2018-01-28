@@ -30,14 +30,16 @@ function throwOnRelease () {
 }
 
 function release (client, err) {
-  console.log(client.socket.localPort, 'release ', new Date().toISOString());
   client.release = throwOnRelease
   if (err || this.ending) {
+    console.log('pool release on error / ending ', client.socket.localPort);
     this._remove(client)
     this._pulseQueue()
     return
   }
 
+  console.log('pool release to idle ', client.socket.localPort);
+  
   // idle timeout
   let tid
   if (this.options.idleTimeoutMillis) {
@@ -184,7 +186,9 @@ class Pool extends EventEmitter {
     var client = new Client();
     this._clients.push(client)
     const idleListener = (err) => {
-      err.client = client
+      console.log('idleListener is actually errror listener ');
+      err.client = client;
+      console.log('remove idleListener / error listerner');
       client.removeListener('error', idleListener)
       client.on('error', () => {
         console.log('additional client error after disconnection due to error', err)
@@ -195,7 +199,11 @@ class Pool extends EventEmitter {
       this.emit('error', err, client)
     }
 
-  
+    const endListener = () => {
+      console.log('remove client endListener')
+      this._remove(client);
+    };
+
     // connection timeout logic
     let tid
     let timeoutHit = false
@@ -217,7 +225,12 @@ class Pool extends EventEmitter {
       if (tid) {
         clearTimeout(tid)
       }
-      client.on('error', idleListener)
+      console.log('set error listener ', client.socket.localPort);
+      client.on('error', idleListener);
+      // if server disconnects
+      // my addition 
+      client.on('end', endListener);
+
       if (err) {
         // remove the dead client from our list of clients
         this._clients = this._clients.filter(c => c !== client)
