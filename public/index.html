@@ -102,6 +102,17 @@
     .row {
       display: flex;
     }
+    table {
+    border-collapse: collapse;
+    width: 100%;
+}
+ 
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
   </style>
 </head>
 
@@ -116,9 +127,9 @@
 
   <div class="row">
     <label>Time</label>
-    <input id="time" placeholder="Time" type="text" required="" value="20">
+    <input id="time" placeholder="Time" type="text" required="" value="5">
     <label>Message</label>
-    <input id="message" placeholder="Message" type="text" required="" value="some text">
+    <input id="message" placeholder="Message" type="text" required="" value="abcd">
   </div>
 
   <div class="row">
@@ -137,11 +148,48 @@
  
   <script>
 
+    function updateStatus(str) {
+      var messages = JSON.parse(str);
+      var html = '<table>';
+        console.log(messages);
+        html += '<tr>';
+        html += '<th>';
+          html += 'time'
+        html += '</th>';
+        html += '<th>';
+          html += 'start'
+        html += '</th>';
+        html += '<th>';
+          html += 'sent'
+        html += '</th>';
+        html += '<th>';
+          html += 'received'
+        html += '</th>';
+        html += '</tr>';
+      messages.forEach(function(m,i){
+        html += '<tr>';
+        html += '<td>';
+        html += m.time;
+        html += '</td>';
+        html += '<td>';
+        html += m.start;
+        html += '</td>';
+        html += '<td>';
+        html += m.sent;
+        html += '</td>';
+        html += '<td>';
+        html += m.received;
+        html += '</td>';
+        html += '</tr>';
+      });
+      html += '</table>';
+      document.getElementById("status").innerHTML = html;
+    }
     function connect() {
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("status").innerHTML = xhttp.responseText;
+          updateStatus(xhttp.responseText);
         }
       };
       xhttp.open("GET", "/connect/new", true);
@@ -153,7 +201,7 @@
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("status").innerHTML = xhttp.responseText;
+          updateStatus(xhttp.responseText);  
         }
       };
       xhttp.open("GET", "/status", true);
@@ -164,7 +212,7 @@
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("response").innerHTML = xhttp.responseText;
+          updateStatus(xhttp.responseText);
         }
       };
       var el1 = document.getElementById("time");
@@ -179,7 +227,6 @@
       xhttp.send(JSON.stringify(params));
     }
 
-   
     refresh();
 
   </script>
